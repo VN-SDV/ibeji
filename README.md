@@ -1,213 +1,199 @@
-# Project Eclipse Ibeji
+# Dự án Eclipse Ibeji
 
-- [Introduction](#introduction)
-- [High-level Design](#high-level-design)
-- [Prerequisites](#prerequisites)
-  - [Install gcc](#install-gcc)
-  - [Install Rust](#install-rust)
-  - [Install Protobuf Compiler](#install-protobuf-compiler)
-- [Cloning the Repo](#cloning-the-repo)
-- [Developer Notes](#developer-notes)
-  - [JSON-LD Crate](#json-ld-crate)
-  - [DTDL Parser](#dtdl-parser)
-- [Building](#building)
-- [Running the Tests](#running-the-tests)
-- [Running the Demo](#running-the-demo)
-- [Trademarks](#trademarks)
+- [Giới thiệu](#giới thiệu)
+- [Thiết kế cấp cao](#thiết kế cấp cao)
+- [Điều kiện tiên quyết](#điều kiện tiên quyết)
+   - [Cài đặt gcc](#install-gcc)
+   - [Cài đặt Rust](#install-rust)
+   - [Cài đặt trình biên dịch Protobuf](#install-protobuf-compiler)
+- [Nhân bản Repo](#cloning-the-repo)
+- [Ghi chú của nhà phát triển](#developer-notes)
+   - [JSON-LD Crate](#json-ld-crate)
+   - [Trình phân tích DTDL](#dtdl-parser)
+- [Tòa nhà](#tòa nhà)
+- [Chạy thử nghiệm](#running-the-tests)
+- [Chạy Demo](#running-the-demo)
+- [Nhãn hiệu](#trademarks)
 
-## <a name="introduction">Introduction</a>
+## <a name="introduction">Giới thiệu</a>
 
-Eclipse Ibeji aims to provide the capability to express a digital representation of the vehicle state and its capabilities
-through an extensible, open and dynamic architecture that provides access to the vehicle hardware, sensors and capabilities.
+Eclipse Ibeji nhằm mục đích cung cấp khả năng thể hiện một biểu diễn kỹ thuật số về trạng thái phương tiện và các khả năng của nó
+thông qua một kiến trúc có thể mở rộng, cởi mở và năng động, cung cấp quyền truy cập vào phần cứng, cảm biến và khả năng của xe.
 
-## <a name="high-level-design">High-level Design</a>
+## <a name="high-level-design">Thiết kế cấp cao</a>
 
-Ibeji's architecture has an In-Vehicle Digital Twin Service at its core. The In-Vehicle Digital Twin Service captures all of the vehicle's primary capabilities
-and makes them available to Ibeji consumers. Another component in Ibeji's architecture is the Provider. A vehicle may have one or more providers.
-A provider exposes a subset of the vehicle's primary capabilities by registering them with the In-Vehicle Digital Twin Service. Once registered with the
-In-Vehicle Digital Twin Service they can in turn be offered to Ibeji consumers. Each capability includes meta data that allow Ibeji consumers to comprehend
-the nature of the capability, how to work with it and how it can be remotely accessed.
+Kiến trúc của Ibeji có Dịch vụ song sinh kỹ thuật số trong xe làm cốt lõi. Dịch vụ bản sao kỹ thuật số trong xe nắm bắt tất cả các khả năng chính của xe
+và cung cấp chúng cho người tiêu dùng Ibeji. Một thành phần khác trong kiến trúc của Ibeji là Nhà cung cấp. Một phương tiện có thể có một hoặc nhiều nhà cung cấp.
+Nhà cung cấp hiển thị một tập hợp con các khả năng chính của phương tiện bằng cách đăng ký chúng với Dịch vụ bản sao kỹ thuật số trong xe. Sau khi đã đăng ký với
+Đến lượt mình, Dịch vụ Bản sao Kỹ thuật số Trong Xe có thể được cung cấp cho người tiêu dùng Ibeji. Mỗi khả năng bao gồm siêu dữ liệu cho phép người tiêu dùng Ibeji hiểu
+bản chất của khả năng, cách làm việc với nó và cách truy cập từ xa.
 
-## <a name="prerequisites">Prerequisites</a>
+## <a name="prerequisites">Điều kiện tiên quyết</a>
 
-### <a name="install-gcc">Install gcc</a>
+### <a name="install-gcc">Cài đặt gcc</a>
 
-Rust needs gcc's linker, so you will need to install it. To install gcc, do the following:
+Rust cần trình liên kết của gcc, vì vậy bạn sẽ cần cài đặt nó. Để cài đặt gcc, hãy làm như sau:
 
-```shell
-sudo apt install gcc
+vỏ ```
+Sudo apt cài đặt gcc
 ```
 
-### <a name="install-rust">Install Rust</a>
+### <a name="install-rust">Cài đặt Rust</a>
 
-At this point in time, you will need to use a nightly release of Rust. While it is not ideal to rely on a nightly release, we should be able to rely on the
-stable release of Rust sometime in the not too distant future when some of the Rust crates that we use can all rely on it as well. To install Rust, do the following:
+Tại thời điểm này, bạn sẽ cần sử dụng bản phát hành Rust hàng đêm. Mặc dù không lý tưởng nếu dựa vào bản phát hành hàng đêm, nhưng chúng ta có thể dựa vào
+bản phát hành ổn định của Rust vào một thời điểm nào đó trong tương lai không xa khi một số thùng Rust mà chúng tôi sử dụng cũng có thể dựa vào nó. Để cài đặt Rust, hãy làm như sau:
 
-```shell
-sudo apt update
-sudo apt install -y snapd
-sudo snap install rustup --classic
-rustup toolchain install nightly-2022-08-11
-rustup default nightly-2022-08-11
+vỏ ```
+cập nhật sudo apt
+sudo apt cài đặt -y snapd
+Sudo snap cài đặt Rustup --classic
+cài đặt chuỗi công cụ rỉ sét hàng đêm-2022-08-11
+Rustup mặc định hàng đêm-2022-08-11
 ```
 
-If you have already installed Rust, but you are using another release, then you can switch to the nightly-2022-08-11 release by running the following commands:
+Nếu bạn đã cài đặt Rust nhưng đang sử dụng một bản phát hành khác thì bạn có thể chuyển sang bản phát hành nightly-2022-08-11 bằng cách chạy các lệnh sau:
 
-```shell
-rustup toolchain install nightly-2022-08-11
-rustup default nightly-2022-08-11
+vỏ ```
+cài đặt chuỗi công cụ rỉ sét hàng đêm-2022-08-11
+Rustup mặc định hàng đêm-2022-08-11
 ```
 
-### <a name="install-protobuf-compiler">Install Protobuf Compiler</a>
+### <a name="install-protobuf-compiler">Cài đặt trình biên dịch Protobuf</a>
 
-You will need to install the Protobuf Compiler. This can be done by executing:
+Bạn sẽ cần cài đặt Trình biên dịch Protobuf. Điều này có thể được thực hiện bằng cách thực hiện:
 
-`sudo apt install -y protobuf-compiler`
+`sudo apt install -y trình biên dịch protobuf`
 
-## <a name="cloning-the-repo">Cloning the Repo</a>
+## <a name="cloning-the-repo">Nhân bản Repo</a>
 
-The repo has two submodules [opendigitaltwins-dtdl](https://github.com/Azure/opendigitaltwins-dtdl) and [iot-plugandplay-models](https://github.com/Azure/iot-plugandplay-models) that provide DTDL context files
-and DTDL samples file. To ensure that these are included, please use the following command when cloning Ibeji's github repo:
+Repo có hai mô-đun con [opendigitaltwins-dtdl](https://github.com/Azure/opendigitaltwins-dtdl) và [iot-plugandplay-models](https://github.com/Azure/iot-plugandplay-models) cung cấp các tệp ngữ cảnh DTDL
+và tệp mẫu DTDL. Để đảm bảo rằng những thứ này được bao gồm, vui lòng sử dụng lệnh sau khi nhân bản repo github của Ibeji:
 
 `git clone --recurse-submodules https://github.com/eclipse-ibeji/ibeji`
 
-## <a name="developer-notes">Developer Notes</a>
+## <a name="developer-notes">Ghi chú của nhà phát triển</a>
 
-### <a name="json-ld-crate">JSON-LD Crate</a>
+### <a name="json-ld-crate">Thùng JSON-LD</a>
 
-Ideally, we should be using the json_ld 0.6.1 crate, which takes its source from [here](https://github.com/timothee-haudebourg/json-ld).
-However, it currently has a build issue that is discussed [here](https://github.com/timothee-haudebourg/json-ld/issues/40).
-To work around this issue you will need to use git clone to obtain the source from [here](https://github.com/blast-hardcheese/json-ld)
-and checkout its "resolve-issue-40" branch. It should be cloned to a directory that is a sibling to ibeji.
+Tốt nhất là chúng ta nên sử dụng thùng json_ld 0.6.1 lấy nguồn từ [tại đây](https://github.com/timothee-haudebourg/json-ld).
+Tuy nhiên, nó hiện có vấn đề về bản dựng được thảo luận [tại đây](https://github.com/timothee-haudebourg/json-ld/issues/40).
+Để khắc phục sự cố này, bạn sẽ cần sử dụng git clone để lấy nguồn từ [tại đây](https://github.com/blast-hardcheese/json-ld)
+và kiểm tra nhánh "resolve-issue-40" của nó. Nó sẽ được sao chép vào một thư mục là anh chị em với ibeji.
 
-### <a name="dtdl-parser">DTDL Parser</a>
+### <a name="dtdl-parser">Trình phân tích cú pháp DTDL</a>
 
-There is no existing DTDL Parser for Rust, so we have provided a minimalistic one for DTDL v2 that is based on the [JavaScript DTDL Parser](https://github.com/Azure/azure-sdk-for-js/tree/%40azure/dtdl-parser_1.0.0-beta.2/sdk/digitaltwins/dtdl-parser).
+Hiện không có Trình phân tích cú pháp DTDL cho Rust, vì vậy chúng tôi đã cung cấp một trình phân tích cú pháp tối giản cho DTDL v2 dựa trên [Trình phân tích cú pháp DTDL JavaScript](https://github.com/Azure/azure-sdk-for-js/tree/ %40azure/dtdl-parser_1.0.0-beta.2/sdk/digitaltwins/dtdl-parser).
 
-## <a name="building">Building</a>
+## <a name="building">Tòa nhà</a>
 
-Once you have installed the prerequisites, go to your enlistment's root directory and run:
+Khi bạn đã cài đặt các điều kiện tiên quyết, hãy chuyển đến thư mục gốc của phần đăng ký của bạn và chạy:
 
-`cargo build`
+`xây dựng hàng hóa`
 
-This should build all of the libraries and executables.
+Điều này sẽ xây dựng tất cả các thư viện và tệp thực thi.
 
-## <a name="running-the-tests">Running the Tests</a>
+## <a name="running-the-tests">Chạy thử nghiệm</a>
 
-After successfully building Ibeji, you can run all of the unit tests. To do this go to the enlistment's root directory and run:
+Sau khi xây dựng thành công Ibeji, bạn có thể chạy tất cả các bài kiểm tra đơn vị. Để thực hiện việc này, hãy chuyển đến thư mục gốc của người đăng ký và chạy:
 
-`cargo test`
+`kiểm tra hàng hóa`
 
-Currently, we have no integration tests or end-to-end tests.
+Hiện tại, chúng tôi không có thử nghiệm tích hợp hoặc thử nghiệm đầu cuối.
 
-## <a name="running-the-demo">Running the Demo</a>
+## <a name="running-the-demo">Chạy Demo</a>
 
-There are currently three demos: one that demonstrates the use of a property, one that demonstrates the use of a command and one that
-demonstrates the mixed use of properties and commands.
+Hiện tại có ba bản minh họa: một minh họa việc sử dụng thuộc tính, một minh họa việc sử dụng lệnh và một minh họa
+thể hiện việc sử dụng hỗn hợp các thuộc tính và lệnh.
 
-The demos use config files and we have provided a templated version of each config file.  These templates can be found in:
+Các bản trình diễn sử dụng tệp cấu hình và chúng tôi đã cung cấp phiên bản mẫu của từng tệp cấu hình. Những mẫu này có thể được tìm thấy trong:
 
-- {repo-root-dir}/core/invehicle_digital_twin/template
+- {repo-root-dir}/core/invehicle_digital_twin/mẫu
 - {repo-root-dir}/samples/common/template
 
-The following instructions are for the demo for the use of a property.
+Các hướng dẫn sau đây dành cho bản demo để sử dụng thuộc tính.
 
-Steps:
+Các bước:
 
-1. The best way to run the demo is by using three windows: one running the In-Vehicle Digital Twin, one running the Provider and one running a Consumer.
-Orientate the three windows so that they are lined up in a column. The top window can be used for the In-Vehicle Digital Twin.
-The middle window can be used for the Provider. The bottom window can be used for a Consumer.<br>
-1. In each window, change directory to the directory containing the build artifacts.
-Make sure that you replace "{repo-root-dir}" with the repository root directory on the machine where you are running the demo.<br><br>
-`cd {repo-root-dir}/target/debug`<br>
-1. Create the three config files with the following contents, if they are not already there:<br><br>
----- consumer_settings.yaml ----<br>
+1. Cách tốt nhất để chạy bản trình diễn là sử dụng ba cửa sổ: một cửa sổ chạy Bản sao kỹ thuật số trong xe, một cửa sổ chạy Nhà cung cấp và một cửa sổ chạy Người tiêu dùng.
+Định hướng ba cửa sổ để chúng được xếp thành một cột. Cửa sổ trên cùng có thể được sử dụng cho Twin kỹ thuật số trong xe.
+Cửa sổ ở giữa có thể được sử dụng cho Nhà cung cấp. Cửa sổ dưới cùng có thể được sử dụng cho Người tiêu dùng.<br>
+1. Trong mỗi cửa sổ, hãy thay đổi thư mục thành thư mục chứa các tạo phẩm xây dựng.
+Đảm bảo rằng bạn thay thế "{repo-root-dir}" bằng thư mục gốc của kho lưu trữ trên máy mà bạn đang chạy bản trình diễn.<br><br>
+`cd {repo-root-dir}/đích/gỡ lỗi`<br>
+1. Tạo ba tệp cấu hình có nội dung sau, nếu chưa có:<br><br>
+---- Consumer_settings.yaml ----<br>
 `consumer_authority: "0.0.0.0:6010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
 ---- invehicle_digital_twin_settings.yaml ----<br>
 `invehicle_digital_twin_authority: "0.0.0.0:5010"`<br><br>
----- provider_settings.yaml ----<br>
+---- nhà cung cấp_settings.yaml ----<br>
 `provider_authority: "0.0.0.0:4010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
-1. In the top window, run:<br><br>
+1. Trong cửa sổ trên cùng, hãy chạy:<br><br>
 `./in-vehicle-digital-twin`<br>
-1. In the middle window, run:<br><br>
+1. Trong cửa sổ ở giữa, hãy chạy:<br><br>
 `./property-provider`<br>
-1. In the bottom window, run:<br><br>
+1. Trong cửa sổ dưới cùng, hãy chạy:<br><br>
 `./property-consumer`<br>
-1. Use control-c in each of the windows when you wish to stop the demo.
+1. Sử dụng control-c trong mỗi cửa sổ khi bạn muốn dừng bản trình diễn.
 
-The following instructions are for the demo for the use of a command.
+Các hướng dẫn sau đây dành cho bản demo để sử dụng lệnh.
 
-Steps:
+Các bước:
 
-1. The best way to run the demo is by using three windows: one running the In-Vehicle Digital Twin, one running the Provider and one running a Consumer.
-Orientate the three windows so that they are lined up in a column. The top window can be used for the In-Vehicle Digital Twin.
-The middle window can be used for the Provider. The bottom window can be used for a Consumer.<br>
-1. In each window, change directory to the directory containing the build artifacts.
-Make sure that you replace "{repo-root-dir}" with the repository root directory on the machine where you are running the demo.<br><br>
-`cd {repo-root-dir}/target/debug`<br>
-1. Create the three config files with the following contents, if they are not already there:<br><br>
----- consumer_settings.yaml ----<br>
+1. Cách tốt nhất để chạy bản trình diễn là sử dụng ba cửa sổ: một cửa sổ chạy Bản sao kỹ thuật số trong xe, một cửa sổ chạy Nhà cung cấp và một cửa sổ chạy Người tiêu dùng.
+Định hướng ba cửa sổ để chúng được xếp thành một cột. Cửa sổ trên cùng có thể được sử dụng cho Twin kỹ thuật số trong xe.
+Cửa sổ ở giữa có thể được sử dụng cho Nhà cung cấp. Cửa sổ dưới cùng có thể được sử dụng cho Người tiêu dùng.<br>
+1. Trong mỗi cửa sổ, hãy thay đổi thư mục thành thư mục chứa các tạo phẩm xây dựng.
+Đảm bảo rằng bạn thay thế "{repo-root-dir}" bằng thư mục gốc của kho lưu trữ trên máy mà bạn đang chạy bản trình diễn.<br><br>
+`cd {repo-root-dir}/đích/gỡ lỗi`<br>
+1. Tạo ba tệp cấu hình có nội dung sau, nếu chưa có:<br><br>
+---- Consumer_settings.yaml ----<br>
 `consumer_authority: "0.0.0.0:6010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
 ---- invehicle_digital_twin_settings.yaml ----<br>
 `invehicle_digital_twin_authority: "0.0.0.0:5010"`<br><br>
----- provider_settings.yaml ----<br>
+---- nhà cung cấp_settings.yaml ----<br>
 `provider_authority: "0.0.0.0:4010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
-1. In the top window, run:<br><br>
+1. Trong cửa sổ trên cùng, hãy chạy:<br><br>
 `./in-vehicle-digital-twin`<br>
-1. In the middle window, run:<br><br>
+1. Trong cửa sổ ở giữa, hãy chạy:<br><br>
 `./command-provider`<br>
-1. In the bottom window, run:<br><br>
+1. Trong cửa sổ dưới cùng, hãy chạy:<br><br>
 `./command-consumer`<br>
-1. Use control-c in each of the windows when you wish to stop the demo.
+1. Sử dụng control-c trong mỗi cửa sổ khi bạn muốn dừng bản trình diễn.
 
-The following instructions are for the demo for the mixed use of commands and properties.
+Các hướng dẫn sau đây dành cho bản trình diễn để sử dụng hỗn hợp các lệnh và thuộc tính.
 
-Steps:
+Các bước:
 
-1. The best way to run the demo is by using three windows: one running the In-Vehicle Digital Twin, one running the Provider and one running a Consumer.
-Orientate the three windows so that they are lined up in a column. The top window can be used for the In-Vehicle Digital Twin.
-The middle window can be used for the Provider. The bottom window can be used for a Consumer.<br>
-1. In each window, change directory to the directory containing the build artifacts.
-Make sure that you replace "{repo-root-dir}" with the repository root directory on the machine where you are running the demo.<br><br>
-`cd {repo-root-dir}/target/debug`<br>
-1. Create the three config files with the following contents, if they are not already there:<br><br>
----- consumer_settings.yaml ----<br>
+1. Cách tốt nhất để chạy bản trình diễn là sử dụng ba cửa sổ: một cửa sổ chạy Bản sao kỹ thuật số trong xe, một cửa sổ chạy Nhà cung cấp và một cửa sổ chạy Người tiêu dùng.
+Định hướng ba cửa sổ để chúng được xếp thành một cột. Cửa sổ trên cùng có thể được sử dụng cho Twin kỹ thuật số trong xe.
+Cửa sổ ở giữa có thể được sử dụng cho Nhà cung cấp. Cửa sổ dưới cùng có thể được sử dụng cho Người tiêu dùng.<br>
+1. Trong mỗi cửa sổ, hãy thay đổi thư mục thành thư mục chứa các tạo phẩm xây dựng.
+Đảm bảo rằng bạn thay thế "{repo-root-dir}" bằng thư mục gốc của kho lưu trữ trên máy mà bạn đang chạy bản trình diễn.<br><br>
+`cd {repo-root-dir}/đích/gỡ lỗi`<br>
+1. Tạo ba tệp cấu hình có nội dung sau, nếu chưa có:<br><br>
+---- Consumer_settings.yaml ----<br>
 `consumer_authority: "0.0.0.0:6010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
 ---- invehicle_digital_twin_settings.yaml ----<br>
 `invehicle_digital_twin_authority: "0.0.0.0:5010"`<br><br>
----- provider_settings.yaml ----<br>
+---- nhà cung cấp_settings.yaml ----<br>
 `provider_authority: "0.0.0.0:4010"`<br>
 `invehicle_digital_twin_url: "http://0.0.0.0:5010"`<br><br>
-1. In the top window, run:<br><br>
+1. Trong cửa sổ trên cùng, hãy chạy:<br><br>
 `./in-vehicle-digital-twin`<br>
-1. In the middle window, run:<br><br>
+1. Trong cửa sổ ở giữa, hãy chạy:<br><br>
 `./mixed-provider`<br>
-1. In the bottom window, run:<br><br>
+1. Trong cửa sổ dưới cùng, hãy chạy:<br><br>
 `./mixed-consumer`<br>
-1. Use control-c in each of the windows when you wish to stop the demo.
+1. Sử dụng control-c trong mỗi cửa sổ khi bạn muốn dừng bản trình diễn.
 
-If you want the consumers and providers for each demo to use Chariott to discover the URL for the In-Vehicle Digital Twin Service, rather than
-having it statically provided in their respective config file, then do the following before starting each demo:
+Nếu bạn muốn người tiêu dùng và nhà cung cấp cho mỗi bản demo sử dụng Chariott để khám phá URL cho Dịch vụ bản sao kỹ thuật số trong xe, thay vì
+có nó được cung cấp tĩnh trong tệp cấu hình tương ứng của chúng, sau đó thực hiện các thao tác sau trước khi bắt đầu mỗi bản trình diễn:
 
-1. Clone a copy of Chariott from GitHub (`https://github.com/eclipse-chariott/chariott`).
-1. Build Chariott
-1. Set Chariott's CHARIOTT_REGISTRY_TTL_SECS environment variable to a high number (we suggest 86400 seconds), as Ibeji does not rely on Chariott's announce feature:<br><br>
-`export CHARIOTT_REGISTRY_TTL_SECS=86400`<br>
-1. Run Chariott:<br><br>
-`cargo run -p chariott`<br>
-1. In each of the the config files, add the setting:<br><br>
-`chariott_url: "http://0.0.0.0:4243"`<br>
-1. In the consumer's config file and the provider's config file, remove the setting for invehicle_digital_twin_url, so that the chariott_url will be used to find the In-vehicle Digital Twin URL.<br>
-
-## <a name="trademarks">Trademarks</a>
-
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+1. Sao chép một bản Chariott từ GitHub (`https://github.com/eclipse-chariott/chariott`).
+1. Xây dựng Chariott
+1. Đặt biến môi trường CHARIOTT_REGISTRY_TTL_SECS của Chariott thành một số cao (chúng tôi đề xuất 86400 giây), vì Ibeji không dựa vào Chariot
